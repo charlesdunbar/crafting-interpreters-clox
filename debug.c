@@ -10,15 +10,23 @@ void disassembleChunk(Chunk* chunk, const char* name) {
     }
 }
 
+/// @brief Print an instruction using a constant
+/// @param name Name of the instruction
+/// @param chunk Bytecode to read
+/// @param offset offset to read in the bytecode
+/// @return offset value + 2 (1 for opcode, one for operand)
 static int constantInstruction(const char* name, Chunk* chunk, int offset) {
     uint8_t constant = chunk->code[offset + 1];
     printf("%-16s %4d '", name, constant);
     printValue(chunk->constants.values[constant]);
     printf("'\n");
-    // 1 byte for opscode, 1 byte for operand
     return offset + 2;
 }
 
+/// @brief Print the instruction name used
+/// @param name Instruction name to print
+/// @param offset offset to increment
+/// @return int of offset + 1
 static int simpleInstruction(const char* name, int offset) {
     printf("%s\n", name);
     return offset + 1;
@@ -37,6 +45,16 @@ int disassembleInstruction(Chunk* chunk, int offset) {
     switch(instruction) {
         case OP_CONSTANT:
             return constantInstruction("OP_CONSTANT", chunk, offset);
+        case OP_ADD:
+            return simpleInstruction("OP_ADD", offset);
+        case OP_SUBTRACT:
+            return simpleInstruction("OP_SUBTRACT", offset);
+        case OP_MULTIPLY:
+            return simpleInstruction("OP_MULTIPLY", offset);
+        case OP_DIVIDE:
+            return simpleInstruction("OP_DIVIDE", offset);
+        case OP_NEGATE:
+            return simpleInstruction("OP_NEGATE", offset);
         case OP_RETURN:
             return simpleInstruction("OP_RETURN", offset);
         default:
