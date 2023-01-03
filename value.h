@@ -5,10 +5,13 @@
 
 typedef double Value;
 
+/**
+ * @brief Dynamic array structure used to store constant values
+ */
 typedef struct {
-    int capacity;
-    int count;
-    Value* values;
+    int capacity; ///< Maximum size of the array
+    int count; ///< Number of elements allocated in values array
+    Value* values; ///< Array of actual values
 } ValueArray;
 
 void initValueArray(ValueArray* array);

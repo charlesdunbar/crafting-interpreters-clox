@@ -11,6 +11,7 @@ typedef struct {
     // Instruction pointer, or program counter
     uint8_t* ip;
     Value stack[STACK_MAX];
+    // Pointer one beyond the last added value, used for knowing where in the stack we are
     Value* stackTop;
 } VM;
 

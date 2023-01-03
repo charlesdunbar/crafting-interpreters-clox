@@ -3,6 +3,12 @@
 #include "debug.h"
 #include "value.h"
 
+/**
+ * @brief Print the name of a chunk and disassemble its instructions
+ * @param chunk The bytecode chunk to disassemble
+ * @param name The name of the chunk
+
+ */
 void disassembleChunk(Chunk* chunk, const char* name) {
     printf("== %s ==\n", name);
     for (int offset = 0; offset < chunk->count;) {
@@ -10,11 +16,13 @@ void disassembleChunk(Chunk* chunk, const char* name) {
     }
 }
 
-/// @brief Print an instruction using a constant
-/// @param name Name of the instruction
-/// @param chunk Bytecode to read
-/// @param offset offset to read in the bytecode
-/// @return offset value + 2 (1 for opcode, one for operand)
+/**
+ * @brief Print an instruction using a constant
+ * @param name Name of the instruction
+ * @param chunk Bytecode to read
+ * @param offset offset to read in the bytecode
+ * @return offset value + 2 (1 for opcode, one for operand)
+ */
 static int constantInstruction(const char* name, Chunk* chunk, int offset) {
     uint8_t constant = chunk->code[offset + 1];
     printf("%-16s %4d '", name, constant);
@@ -23,15 +31,23 @@ static int constantInstruction(const char* name, Chunk* chunk, int offset) {
     return offset + 2;
 }
 
-/// @brief Print the instruction name used
-/// @param name Instruction name to print
-/// @param offset offset to increment
-/// @return int of offset + 1
+/**
+ * @brief Print the instruction name used
+ * @param name Instruction name to print
+ * @param offset offset to increment
+ * @return int of offset + 1
+ */
 static int simpleInstruction(const char* name, int offset) {
     printf("%s\n", name);
     return offset + 1;
 }
 
+/**
+ * @brief Print an opcode and any extra information about the type
+ * @param chunk Bytecode chunk to decode
+ * @param offset Where to start reading in the bytecode, in bytes
+ * @return updated offset value past the just dissassembled instruction
+ */
 int disassembleInstruction(Chunk* chunk, int offset) {
     printf("%04d ", offset);
     if (offset > 0 && 

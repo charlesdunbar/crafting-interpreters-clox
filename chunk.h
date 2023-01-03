@@ -4,6 +4,9 @@
 #include "common.h"
 #include "value.h"
 
+/**
+ * @brief Operation Codes that the lox language supports
+ */
 typedef enum {
     OP_CONSTANT,
     OP_ADD,
@@ -14,12 +17,15 @@ typedef enum {
     OP_RETURN,
 } OpCode;
 
+/**
+ * @brief Chunks are a sequence of bytecode
+ */
 typedef struct {
-    int count;
-    int capacity;
-    uint8_t* code;
-    int* lines;
-    ValueArray constants;
+    int count; ///< Number of elements allocated in code array
+    int capacity; ///< Maximum size of code array
+    uint8_t* code; ///< The array of bytes of code
+    int* lines; ///< Array of lines to relate to source code, mirrors the code array and only stores the line number for the code
+    ValueArray constants; ///< Array of constants used for bytecode
 } Chunk;
 
 void initChunk(Chunk* chunk);
