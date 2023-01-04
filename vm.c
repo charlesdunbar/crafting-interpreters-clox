@@ -1,16 +1,22 @@
 #include <stdio.h>
 
 #include "common.h"
+#include "compiler.h"
 #include "debug.h"
 #include "vm.h"
 
 VM vm;
 
+/**
+ * @brief Reset the stackTop pointer to the beginning of the stack.
+ */
 static void resetStack() {
     vm.stackTop = vm.stack;
 }
 
-
+/**
+ * @brief Initalize the Virtual machine
+ */
 void initVM() {
     resetStack();
 }
@@ -19,17 +25,29 @@ void freeVM() {
 
 }
 
+/**
+ * @brief Add a value to the VM's stack, incrementing stackTop afterwords.
+ * @param value Value to add to stack
+ */
 void push(Value value) {
     *vm.stackTop = value;
     vm.stackTop++;
     //TODO: test with *vm.stackTop++ = value;
 }
 
+/**
+ * @brief Return the value at the stackTop pointer after decrementing it, causing the next push() to overwrite the value.
+ * @return Value at the stackTop pointer
+ */
 Value pop() {
     vm.stackTop--;
     return *vm.stackTop;
 }
 
+/**
+ * @brief Code used for interpreting bytecode
+ * @return Status of the intrepretation, either OK or some error
+ */
 static InterpretResult run() {
 #define READ_BYTE() (*vm.ip++)
 #define READ_CONSTANT() (vm.chunk->constants.values[READ_BYTE()])
@@ -76,8 +94,11 @@ static InterpretResult run() {
 #undef BINARY_OP
 }
 
-InterpretResult interpret(Chunk* chunk) {
-    vm.chunk = chunk;
-    vm.ip = vm.chunk->code;
-    return run();
+/**
+ * @brief interpret a string of source code
+ * @return Wheather the interpretation was ok, or some error occured
+*/
+InterpretResult interpret(const char* source) {
+    compile(source);
+    return INTERPRET_OK;
 }

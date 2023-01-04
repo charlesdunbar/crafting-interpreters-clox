@@ -3,10 +3,12 @@
 #include "chunk.h"
 #include "memory.h"
 
-// Chunks are a sequence of bytecode
+// 
 
-/// @brief Initalize a chunk to zero
-/// @param chunk - the existing chunk to zero out
+/**
+ * @brief Initalize a chunk to zero
+ * @param chunk the existing chunk to zero out
+ */
 void initChunk(Chunk* chunk) {
     chunk->count = 0;
     chunk->capacity = 0;
@@ -15,9 +17,15 @@ void initChunk(Chunk* chunk) {
     initValueArray(&chunk->constants);
 }
 
-/// @brief Write a byte to the chunk array, resizing if we're at capcity
-/// @param chunk - chunk to append to
-/// @param byte - byte to append to chunk
+/// @brief 
+/// @param chunk 
+/// @param byte 
+/**
+ * @brief Write a byte to the chunk array, resizing if we're at capcity
+ * @param chunk chunk to append to
+ * @param byte byte to append to chunk
+ * @param line the source code line number the chunk is associated with. Used for printing where errors are.
+ */
 void writeChunk(Chunk* chunk, uint8_t byte, int line) {
     if (chunk->capacity < chunk->count + 1) {
         int oldCapacity = chunk->capacity;
@@ -31,12 +39,22 @@ void writeChunk(Chunk* chunk, uint8_t byte, int line) {
     chunk->count++;
 }
 
+/**
+ * @brief Add a constant number to a bytecode
+ * @param chunk The bytecode to add the constant to
+ * @param value The value to add to the bytecode
+ * @return Index of where the value was added in the chunk
+ */
 int addConstant(Chunk* chunk, Value value) {
     writeValueArray(&chunk->constants, value);
     // Return the index where the constant was appended so we can located it later
     return chunk->constants.count - 1;
 }
 
+/**
+ * @brief Free a bytecode
+ * @param chunk The bytecode to free
+ */
 void freeChunk(Chunk* chunk) {
     FREE_ARRAY(uint8_t, chunk->code, chunk->capacity);
     FREE_ARRAY(int, chunk->lines, chunk->capacity);
