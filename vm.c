@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "common.h"
+#include "compiler.h"
 #include "debug.h"
 #include "vm.h"
 
@@ -94,12 +95,10 @@ static InterpretResult run() {
 }
 
 /**
- * @brief Run the instructions of a bytecode chunk
- * @param chunk the chunk to interpret
- * @return Status of the intrepretation, either OK or some error
- */
-InterpretResult interpret(Chunk* chunk) {
-    vm.chunk = chunk;
-    vm.ip = vm.chunk->code;
-    return run();
+ * @brief interpret a string of source code
+ * @return Wheather the interpretation was ok, or some error occured
+*/
+InterpretResult interpret(const char* source) {
+    compile(source);
+    return INTERPRET_OK;
 }
