@@ -95,10 +95,24 @@ static InterpretResult run() {
 }
 
 /**
- * @brief interpret a string of source code
+ * @brief Take a new chunk, pass it to compiler, which fills chunk with bytecode.
+ * Send over to vm if no errors.
  * @return Wheather the interpretation was ok, or some error occured
 */
 InterpretResult interpret(const char* source) {
-    compile(source);
-    return INTERPRET_OK;
+    Chunk chunk;
+    initChunk(&chunk);
+
+    if (!compile(source, &chunk)) {
+        freeChunk(&chunk);
+        return INTERPRET_COMPILE_ERROR;
+    }
+
+    vm.chunk = &chunk;
+    vm.ip = vm.chunk->code;
+
+    InterpretResult result = run();
+
+    freeChunk(&chunk);
+    return result;
 }
