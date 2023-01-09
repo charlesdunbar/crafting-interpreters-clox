@@ -13,6 +13,7 @@ typedef struct {
     Value stack[STACK_MAX];
     // Pointer one beyond the last added value, used for knowing where in the stack we are
     Value* stackTop;
+    Obj* objects;
 } VM;
 
 typedef enum {
@@ -20,6 +21,8 @@ typedef enum {
     INTERPRET_COMPILE_ERROR,
     INTERPRET_RUNTIME_ERROR
 } InterpretResult;
+
+extern VM vm;
 
 void initVM();
 void freeVM();
