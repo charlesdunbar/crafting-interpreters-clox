@@ -2,6 +2,7 @@
 #define clox_vm_h
 
 #include "chunk.h"
+#include "table.h"
 #include "value.h"
 
 #define STACK_MAX 256
@@ -13,6 +14,7 @@ typedef struct {
     Value stack[STACK_MAX];
     // Pointer one beyond the last added value, used for knowing where in the stack we are
     Value* stackTop;
+    Table strings; //< Table used for string interning - a list of all strings assigned so we can do equality checks.
     Obj* objects;
 } VM;
 
