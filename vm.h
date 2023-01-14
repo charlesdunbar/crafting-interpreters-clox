@@ -9,11 +9,10 @@
 
 typedef struct {
     Chunk* chunk;
-    // Instruction pointer, or program counter
-    uint8_t* ip;
+    uint8_t* ip; //< Instruction pointer, or program counter
     Value stack[STACK_MAX];
-    // Pointer one beyond the last added value, used for knowing where in the stack we are
-    Value* stackTop;
+    Value* stackTop; //< Pointer one beyond the last added value, used for knowing where in the stack we are
+    Table globals; //< Table for global variables.
     Table strings; //< Table used for string interning - a list of all strings assigned so we can do equality checks.
     Obj* objects;
 } VM;

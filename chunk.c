@@ -40,7 +40,7 @@ void writeChunk(Chunk* chunk, uint8_t byte, int line) {
 }
 
 /**
- * @brief Add a constant to a bytecode
+ * @brief Add a constant number to a bytecode
  * @param chunk The bytecode to add the constant to
  * @param value The value to add to the bytecode
  * @return Index of where the value was added in the chunk

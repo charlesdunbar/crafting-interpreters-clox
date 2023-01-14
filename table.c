@@ -70,9 +70,6 @@ static void adjustCapacity(Table* table, int capacity) {
         entries[i].value = NIL_VAL;
     }
 
-    table->entries = entries;
-    table->capacity = capacity;
-
     // Re-insert every entry if we're resizing, due to bucket placement being based off array size
     // Don't copy over tombstones to save space.
     table->count = 0;
@@ -88,6 +85,8 @@ static void adjustCapacity(Table* table, int capacity) {
 
     // Free the old array
     FREE_ARRAY(Entry, table->entries, table->capacity);
+    table->entries = entries;
+    table->capacity = capacity;
 }
 
 /**
