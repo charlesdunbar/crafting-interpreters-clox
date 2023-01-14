@@ -4,11 +4,13 @@
 #include "common.h"
 #include "value.h"
 
+// Struct that holds a key/value pair for a hash table.
 typedef struct {
     ObjString* key;
     Value value;
 } Entry;
 
+// Hash table, with an array of Entry, and the count and capacity of the struct.
 typedef struct {
     int count;
     int capacity;
