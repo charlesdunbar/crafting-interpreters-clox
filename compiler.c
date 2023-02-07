@@ -679,6 +679,15 @@ static void forStatement() {
     endScope();
 }
 
+/**
+ * @brief if statement implementation
+ * We consume tokens, and check the if statement.
+ * If it's false, we jump to the `patchJump(thenJump)` line,
+ * which then does a pop and checks for an else statement.
+ * 
+ * If it's true, we pop and do a statement, and jump to the
+ * `patchJump(elseJump)` line so we don't do the else as well.
+ */
 static void ifStatement() {
     consume(TOKEN_LEFT_PAREN, "Expect '(' after 'if'.");
     expression(); // Run through the if condition
@@ -726,7 +735,7 @@ static void function(FunctionType type) {
     block();
 
     ObjFunction* function = endCompiler();
-    emitBytes(OP_CONSTANT, makeConstant(OBJ_VAL(function)));
+    emitBytes(OP_CLOSURE, makeConstant(OBJ_VAL(function)));
 
 }
 
