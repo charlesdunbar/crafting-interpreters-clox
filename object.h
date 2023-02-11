@@ -23,6 +23,7 @@ typedef enum {
     OBJ_FUNCTION,
     OBJ_NATIVE,
     OBJ_STRING,
+    OBJ_UPVALUE
 } ObjType;
 
 struct Obj {
@@ -52,6 +53,11 @@ struct ObjString {
     uint32_t hash;
 };
 
+typedef struct ObjUpvalue {
+    Obj obj;
+    Value* location;
+} ObjUpvalue;
+
 /**
  * @brief Struct to capture local variables from functions
  * All functions get wrapped in this, even if they don't capture local vars.
@@ -60,6 +66,8 @@ struct ObjString {
 typedef struct {
     Obj obj;
     ObjFunction* function;
+    ObjUpvalue** upvalues; //< Closures may have different number of upvalues, so dynamic array needed. Upvalues also are dynamically allocated, so double pointer time.
+    int upvalueCount;
 } ObjClosure;
 
 ObjClosure* newClosure(ObjFunction* function);
@@ -67,6 +75,7 @@ ObjFunction* newFunction();
 ObjNative* newNative(NativeFn function);
 ObjString* takeString(char* chars, int length);
 ObjString* copyString(const char* chars, int length);
+ObjUpvalue* newUpvalue(Value* slot);
 void printObject(Value value);
 
 // Need to use a function because value is used twice.
