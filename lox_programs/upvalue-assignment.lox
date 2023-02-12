@@ -4,7 +4,7 @@ fun outer() {
     fun inner() {
         x = "assigned";
     }
-    inner():
+    inner();
     print x;
 }
 
