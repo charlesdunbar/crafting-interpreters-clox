@@ -22,6 +22,7 @@ typedef struct {
     Value* stackTop; //< Pointer one beyond the last added value, used for knowing where in the stack we are
     Table globals; //< Table for global variables.
     Table strings; //< Table used for string interning - a list of all strings assigned so we can do equality checks.
+    ObjUpvalue* openUpvalues; //< Linked list used for checking new upvalues to existing ones to make sure they all point to a same variable if needed.
     Obj* objects;
 } VM;
 

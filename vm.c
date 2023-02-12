@@ -22,6 +22,7 @@ static Value clockNative(int argCount, Value* args) {
 static void resetStack() {
     vm.stackTop = vm.stack;
     vm.frameCount = 0;
+    vm.openUpvalues = NULL;
 }
 
 static void runtimeError(const char* format, ...) {
@@ -147,8 +148,45 @@ static bool callValue(Value callee, int argCount) {
 }
 
 static ObjUpvalue* captureUpvalue(Value* local) {
+    // Check through linked list of upvalues to get to the correction location in the stack/linked list.
+    ObjUpvalue* prevUpvalue = NULL;
+    ObjUpvalue* upvalue = vm.openUpvalues;
+    while (upvalue != NULL && upvalue->location > local) {
+        prevUpvalue = upvalue;
+        upvalue = upvalue->next;
+    }
+
+    // If we equal a value already in the linked list, return that early
+    if (upvalue != NULL && upvalue->location == local) {
+        return upvalue;
+    }
+
+    // Otherwise need to create a new value here.
     ObjUpvalue* createdUpvalue = newUpvalue(local);
+    createdUpvalue->next = upvalue;
+
+    // If we ran out of upvalues to search, this one will be the start of the linked list.
+    if (prevUpvalue == NULL) {
+        vm.openUpvalues = createdUpvalue;
+    } else {
+        // Otherwise have the previous upvalue point to this one now.
+        prevUpvalue->next = createdUpvalue;
+    }
+
     return createdUpvalue;
+}
+
+/**
+ * @brief Helper function for moving closed variables off the stack to the heap.
+ * @param last address of stack slot
+ */
+static void closeUpvalues(Value* last) {
+    while (vm.openUpvalues != NULL && vm.openUpvalues->location >= last) {
+        ObjUpvalue* upvalue = vm.openUpvalues;
+        upvalue->closed = *upvalue->location;
+        upvalue->location = &upvalue->closed;
+        vm.openUpvalues = upvalue->next;
+    }
 }
 
 /**
@@ -350,9 +388,14 @@ static InterpretResult run() {
                 }
                 break;
             }
+            case OP_CLOSE_UPVALUE:
+                closeUpvalues(vm.stackTop - 1);
+                pop();
+                break;
             case OP_RETURN: {
                 // StackTop should have the result of the function call, save it.
                 Value result = pop();
+                closeUpvalues(frame->slots);
                 vm.frameCount--;
                 // If we're at the end of the main script, exit the whole program.
                 if (vm.frameCount == 0) {
