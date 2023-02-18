@@ -24,6 +24,9 @@ typedef struct {
     Table strings; //< Table used for string interning - a list of all strings assigned so we can do equality checks.
     ObjUpvalue* openUpvalues; //< Linked list used for checking new upvalues to existing ones to make sure they all point to a same variable if needed.
     Obj* objects;
+    int grayCount; //< How many GC objects are marked gray
+    int grayCapacity; //< Size of gray stack
+    Obj** grayStack; //< Stack used to keep track of gray objects as we GC
 } VM;
 
 typedef enum {
