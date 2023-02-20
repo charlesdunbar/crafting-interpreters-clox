@@ -191,13 +191,46 @@ static void traceReferences() {
     }
 }
 
+static void sweep() {
+    Obj* previous = NULL;
+    Obj* object = vm.objects;
+    // Walk the linked list of every object in the heap
+    while (object != NULL) {
+        // If object is black (marked), leave it alone
+        if (object->isMarked) {
+            // Reset black (marked) objects to white (unmarked) for next GC run.
+            object->isMarked = false;
+            previous = object;
+            object = object->next;
+        // Else unlink the object
+        } else {
+            Obj* unreached = object;
+            object = object->next;
+            if (previous != NULL) {
+                previous->next = object;
+            // If we're freeing the first node.
+            } else {
+                vm.objects = object;
+            }
+
+            freeObject(unreached);
+        }
+    }
+}
+
 void collectGarbage() {
 #ifdef DEBUG_LOG_GC
     printf("-- gc begin\n");
 #endif
 
+    // Mark items for GC
     markRoots();
+    // Trace all items, turning gray to black.
     traceReferences();
+    // Get rid of string table items if needed.
+    tableRemoveWhite(&vm.strings);
+    // Get rid of all white (unmarked items) objects.
+    sweep();
 
 #ifdef DEBUG_LOG_GC
     printf("-- gc end\n");

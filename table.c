@@ -169,6 +169,20 @@ ObjString* tableFindString(Table* table, const char* chars, int length, uint32_t
     }
 }
 
+/**
+ * @brief Walk every entry in the table, if an object is not marked, it's about to be deleted.
+ * So we delete it here to prevent dangling pointers.
+ * @param table
+ */
+void tableRemoveWhite(Table* table) {
+    for (int i = 0; i < table->capacity; i++) {
+        Entry* entry = &table->entries[i];
+        if (entry->key != NULL && !entry->key->obj.isMarked) {
+            tableDelete(table, entry->key);
+        }
+    }
+}
+
 void markTable(Table* table) {
     for (int i = 0; i < table->capacity; i++) {
         Entry* entry = &table->entries[i];
