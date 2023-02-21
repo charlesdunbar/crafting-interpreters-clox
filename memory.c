@@ -9,6 +9,8 @@
 #include "debug.h"
 #endif
 
+#define GC_HEAP_GROW_FACTOR 2
+
 /**
  * @brief Resize or free pointers, based on newSize and oldSize
  *
@@ -22,10 +24,14 @@
  * @return NULL if free, otherwise a resized value of pointer
  */
 void* reallocate(void* pointer, size_t oldSize, size_t newSize) {
+    vm.bytesAllocated += newSize - oldSize;
     if (newSize > oldSize) {
 #ifdef DEBUG_STRESS_GC
-    collectGarbage();
-#endif        
+        collectGarbage();
+#endif
+        if (vm.bytesAllocated > vm.nextGC) {
+            collectGarbage();
+        }    
     }
 
     if (newSize == 0) {
@@ -158,7 +164,7 @@ static void freeObject(Obj* object) {
 }
 
 /**
- * @brief Mark local variables or tempories on the vm stac
+ * @brief Mark local variables or temporaries on the vm stack
  * Then the closures
  * Then the upvalues
  * Then the global variables
@@ -221,6 +227,7 @@ static void sweep() {
 void collectGarbage() {
 #ifdef DEBUG_LOG_GC
     printf("-- gc begin\n");
+    size_t before = vm.bytesAllocated;
 #endif
 
     // Mark items for GC
@@ -232,8 +239,14 @@ void collectGarbage() {
     // Get rid of all white (unmarked items) objects.
     sweep();
 
+    vm.nextGC = vm.bytesAllocated * GC_HEAP_GROW_FACTOR;
+
 #ifdef DEBUG_LOG_GC
     printf("-- gc end\n");
+    printf("   collected %zu bytes (from %zu to %zu) next at %zu\n", before - vm.bytesAllocated,
+                                                                     before, 
+                                                                     vm.bytesAllocated,
+                                                                     vm.nextGC);
 #endif
 }
 
