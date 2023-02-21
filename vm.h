@@ -23,7 +23,13 @@ typedef struct {
     Table globals; //< Table for global variables.
     Table strings; //< Table used for string interning - a list of all strings assigned so we can do equality checks.
     ObjUpvalue* openUpvalues; //< Linked list used for checking new upvalues to existing ones to make sure they all point to a same variable if needed.
+
+    size_t bytesAllocated; //< How many bytes have been allocated by the vm.
+    size_t nextGC; //< Threshold on when to trigger next GC.
     Obj* objects;
+    int grayCount; //< How many GC objects are marked gray
+    int grayCapacity; //< Size of gray stack
+    Obj** grayStack; //< Stack used to keep track of gray objects as we GC
 } VM;
 
 typedef enum {
