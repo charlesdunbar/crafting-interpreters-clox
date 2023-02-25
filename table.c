@@ -53,6 +53,13 @@ static Entry* findEntry(Entry* entries, int capacity, ObjString* key) {
     }
 }
 
+/**
+ * @brief Look up a key in a table and update value pointer to its value
+ * @param table table to look through
+ * @param key key to match
+ * @param value pointer to set the matched key to
+ * @return true if found in table, false otherwise
+ */
 bool tableGet(Table* table, ObjString* key, Value* value) {
     if (table->count == 0) return false;
 
