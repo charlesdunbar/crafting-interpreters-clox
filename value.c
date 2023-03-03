@@ -6,8 +6,8 @@
 #include "value.h"
 
 /**
- * @brief Initalize a value array struct to 0
- * @param array The array to initalize
+ * @brief initialize a value array struct to 0
+ * @param array The array to initialize
 
  */
 void initValueArray(ValueArray* array) {
