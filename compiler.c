@@ -79,6 +79,7 @@ typedef struct Compiler {
  */
 typedef struct ClassCompiler {
     struct ClassCompiler* enclosing;
+    bool hasSuperclass;
 } ClassCompiler;
 
 Parser parser;
@@ -649,6 +650,40 @@ static void unary(bool canAssign) {
     }
 }
 
+static Token syntheticToken(const char* text) {
+    Token token;
+    token.start = text;
+    token.length = (int)strlen(text);
+    return token;
+}
+
+static void super_(bool canAssign) {
+    if (currentClass == NULL) {
+        error("Can't use 'super' outside of a class.");
+    } else if (!currentClass->hasSuperclass) {
+        error("Can't use 'super' in a class with no superclass.");
+    }
+
+    consume(TOKEN_DOT, "Expect '.' after 'super'.");
+    consume(TOKEN_IDENTIFIER, "Expect superclass method name.");
+    uint8_t name = identifierConstant(&parser.previous);
+
+    // Get the class that needs to call super.
+    namedVariable(syntheticToken("this"), false);
+
+    // Get the super for it, using a superinstruction if called right away.
+    if (match(TOKEN_LEFT_PAREN)) {
+        uint8_t argCount = argumentList();
+        namedVariable(syntheticToken("super"), false);
+        emitBytes(OP_SUPER_INVOKE, name);
+        emitByte(argCount);
+    } else {
+        namedVariable(syntheticToken("super"), false);
+        emitBytes(OP_GET_SUPER, name);
+    }
+
+}
+
 /**
  * @brief Table of token rules to know what prefix and infix functions to call, and what precendence they have
  */
@@ -686,7 +721,7 @@ ParseRule rules[] = {
     [TOKEN_OR]              =   {NULL,      or_,    PREC_OR},
     [TOKEN_PRINT]           =   {NULL,      NULL,   PREC_NONE},
     [TOKEN_RETURN]          =   {NULL,      NULL,   PREC_NONE},
-    [TOKEN_SUPER]           =   {NULL,      NULL,   PREC_NONE},
+    [TOKEN_SUPER]           =   {super_,    NULL,   PREC_NONE},
     [TOKEN_THIS]            =   {this_,     NULL,   PREC_NONE},
     [TOKEN_TRUE]            =   {literal,   NULL,   PREC_NONE},
     [TOKEN_VAR]             =   {NULL,      NULL,   PREC_NONE},
@@ -898,8 +933,30 @@ static void classDeclaration() {
 
     // Add new class to linked list of classes
     ClassCompiler classCompiler;
+    classCompiler.hasSuperclass = false;
     classCompiler.enclosing = currentClass;
     currentClass = &classCompiler;
+
+    // Check for superclass clause.
+    if (match(TOKEN_LESS)) {
+        consume(TOKEN_IDENTIFIER, "Expect superclass name.");
+        // Load superclass onto stack.
+        variable(false);
+
+        if (identifiersEqual(&className, &parser.previous)) {
+            error("A class can't inherit from itself.");
+        }
+
+        // Create a "super" variable so we know which class's super to call.
+        beginScope();
+        addLocal(syntheticToken("super"));
+        defineVariable(0);
+
+        // Load this class onto the stack.
+        namedVariable(className, false);
+        emitByte(OP_INHERIT);
+        classCompiler.hasSuperclass = true;
+    }
 
     namedVariable(className, false);
     consume(TOKEN_LEFT_BRACE, "Expect '{' before class body.");
@@ -908,6 +965,10 @@ static void classDeclaration() {
     }
     consume(TOKEN_RIGHT_BRACE, "Expect '}' after class body.");
     emitByte(OP_POP);
+
+    if (classCompiler.hasSuperclass) {
+        endScope();
+    }
 
     currentClass = currentClass->enclosing;
 }
