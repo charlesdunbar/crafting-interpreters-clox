@@ -7,7 +7,7 @@
 // 
 
 /**
- * @brief Initalize a chunk to zero
+ * @brief initialize a chunk to zero
  * @param chunk the existing chunk to zero out
  */
 void initChunk(Chunk* chunk) {
