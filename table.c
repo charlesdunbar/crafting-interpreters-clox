@@ -27,7 +27,8 @@ void freeTable(Table* table) {
  * @return 
  */
 static Entry* findEntry(Entry* entries, int capacity, ObjString* key) {
-    uint32_t index = key->hash % capacity;
+    // uint32_t index = key->hash % capacity; - Old slow modulo way
+    uint32_t index = key->hash & (capacity - 1); // Cooler bitmask way, since we're always a power of 2.
     Entry* tombstone = NULL;
 
     for (;;) {
@@ -49,7 +50,8 @@ static Entry* findEntry(Entry* entries, int capacity, ObjString* key) {
 
         // Otherwise, we have a collision - start using linear probing
         // We insert in the next available bucket we can, wrapping if we reach the end.
-        index = (index + 1) % capacity;
+        //index = (index + 1) % capacity;
+        index = (index + 1) & (capacity - 1);
     }
 }
 
@@ -161,7 +163,8 @@ void tableAddAll(Table* from, Table* to) {
 ObjString* tableFindString(Table* table, const char* chars, int length, uint32_t hash) {
     if (table->count == 0) return NULL;
 
-    uint32_t index = hash % table->capacity;
+    //uint32_t index = hash % table->capacity;
+    uint32_t index = hash & (table->capacity - 1);
     for (;;) {
         Entry* entry = &table->entries[index];
         if (entry->key == NULL) {
@@ -172,7 +175,8 @@ ObjString* tableFindString(Table* table, const char* chars, int length, uint32_t
             return entry->key;
         }
 
-        index = (index + 1) % table->capacity;
+        //index = (index + 1) % table->capacity;
+        index = (index + 1) & (table->capacity - 1);
     }
 }
 
